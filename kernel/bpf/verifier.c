@@ -3956,6 +3956,10 @@ static int check_ctx_access(struct bpf_verifier_env *env, int insn_idx, int off,
 		 */
 		*reg_type = info.reg_type;
 
+		if (base_type(*reg_type) == PTR_TO_MEM) {
+			env->insn_aux_data[insn_idx].mem_size = info.mem_size;
+		}
+
 		if (base_type(*reg_type) == PTR_TO_BTF_ID) {
 			*btf = info.btf;
 			*btf_id = info.btf_id;
@@ -4807,9 +4811,14 @@ static int check_mem_access(struct bpf_verifier_env *env, int insn_idx, u32 regn
 			/* ctx access returns either a scalar, or a
 			 * PTR_TO_PACKET[_META,_END]. In the latter
 			 * case, we know the offset is zero.
+			 *
+			 * XRP: allow ctx access to return PTR_TO_MEM
 			 */
 			if (reg_type == SCALAR_VALUE) {
 				mark_reg_unknown(env, regs, value_regno);
+			} else if (reg_type == PTR_TO_MEM) {
+				mark_reg_known_zero(env, regs, value_regno);
+				regs[value_regno].mem_size = env->insn_aux_data[insn_idx].mem_size;
 			} else {
 				mark_reg_known_zero(env, regs,
 						    value_regno);

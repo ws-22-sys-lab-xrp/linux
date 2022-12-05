@@ -488,6 +488,20 @@ const struct io_op_def io_op_defs[] = {
 		.prep			= io_eopnotsupp_prep,
 #endif
 	},
+    [IORING_OP_READ_XRP] = {
+		.name			= "READ_XRP",
+		.needs_file		= 1,
+		.unbound_nonreg_file	= 1,
+		.pollin			= 1,
+		.buffer_select		= 1,
+		.needs_async_data	= 1,
+		.plug			= 1,
+		.async_size		= sizeof(struct io_async_rw),
+		.prep			= io_prep_rw,
+		.issue			= io_read,
+		.prep_async		= io_readv_prep_async,
+		.cleanup		= io_readv_writev_cleanup,
+	},
 };
 
 const char *io_uring_get_opcode(u8 opcode)

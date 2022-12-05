@@ -25,6 +25,8 @@
 #include <linux/srcu.h>
 #include <linux/uuid.h>
 #include <linux/xarray.h>
+#include <linux/pm.h>
+#include <linux/nvme.h>
 
 struct module;
 struct request_queue;
@@ -196,6 +198,8 @@ struct gendisk {
 	struct badblocks *bb;
 	struct lockdep_map lockdep_map;
 	u64 diskseq;
+
+	struct nvme_command *xrp_command;
 
 	/*
 	 * Independent sector access ranges. This is always NULL for

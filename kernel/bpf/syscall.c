@@ -3438,6 +3438,8 @@ attach_type_to_prog_type(enum bpf_attach_type attach_type)
 		return BPF_PROG_TYPE_XDP;
 	case BPF_LSM_CGROUP:
 		return BPF_PROG_TYPE_LSM;
+	case BPF_XRP:
+		return BPF_PROG_TYPE_XRP;
 	default:
 		return BPF_PROG_TYPE_UNSPEC;
 	}
@@ -3447,6 +3449,9 @@ attach_type_to_prog_type(enum bpf_attach_type attach_type)
 
 #define BPF_F_ATTACH_MASK \
 	(BPF_F_ALLOW_OVERRIDE | BPF_F_ALLOW_MULTI | BPF_F_REPLACE)
+
+int xrp_bpf_prog_attach(const union bpf_attr *attr, struct bpf_prog *prog);
+int xrp_bpf_prog_detach(const union bpf_attr *attr);
 
 static int bpf_prog_attach(const union bpf_attr *attr)
 {
@@ -3498,6 +3503,9 @@ static int bpf_prog_attach(const union bpf_attr *attr)
 
 		ret = cgroup_bpf_prog_attach(attr, ptype, prog);
 		break;
+	case BPF_PROG_TYPE_XRP:
+		ret = xrp_bpf_prog_attach(attr, prog);
+		break;
 	default:
 		ret = -EINVAL;
 	}
@@ -3535,6 +3543,8 @@ static int bpf_prog_detach(const union bpf_attr *attr)
 	case BPF_PROG_TYPE_SOCK_OPS:
 	case BPF_PROG_TYPE_LSM:
 		return cgroup_bpf_prog_detach(attr, ptype);
+	case BPF_PROG_TYPE_XRP:
+		return xrp_bpf_prog_detach(attr);
 	default:
 		return -EINVAL;
 	}
