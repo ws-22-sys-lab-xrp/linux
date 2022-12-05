@@ -373,9 +373,9 @@
 449	common	futex_waitv		sys_futex_waitv
 450	common	set_mempolicy_home_node	sys_set_mempolicy_home_node
 
-444	common	print_xrp_stats		sys_print_xrp_stats
-445	common	read_xrp	        sys_read_xrp
-446	common	test_xrp		sys_test_xrp
+451	common	print_xrp_stats		sys_print_xrp_stats
+452	common	read_xrp	        sys_read_xrp
+453	common	test_xrp		sys_test_xrp
 
 #
 # Due to a historical design error, certain syscalls are numbered differently
