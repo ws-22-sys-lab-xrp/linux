@@ -36,6 +36,7 @@ static inline bool io_file_supports_nowait(struct io_kiocb *req)
 int io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 {
 	struct io_rw *rw = io_kiocb_to_cmd(req, struct io_rw);
+    struct kiocb *kiocb = &rw->kiocb;
 	unsigned ioprio;
 	int ret;
 

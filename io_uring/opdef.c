@@ -494,7 +494,6 @@ const struct io_op_def io_op_defs[] = {
 		.unbound_nonreg_file	= 1,
 		.pollin			= 1,
 		.buffer_select		= 1,
-		.needs_async_data	= 1,
 		.plug			= 1,
 		.async_size		= sizeof(struct io_async_rw),
 		.prep			= io_prep_rw,

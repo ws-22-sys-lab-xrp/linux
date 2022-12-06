@@ -26,7 +26,6 @@
 #include <linux/uuid.h>
 #include <linux/xarray.h>
 #include <linux/pm.h>
-#include <linux/nvme.h>
 
 struct module;
 struct request_queue;
@@ -120,7 +119,7 @@ struct blk_integrity {
 	unsigned char				interval_exp;
 	unsigned char				tag_size;
 };
-
+struct nvme_command;
 struct gendisk {
 	/*
 	 * major/first_minor/minors should not be set by any new driver, the

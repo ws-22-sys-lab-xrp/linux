@@ -69,6 +69,8 @@ enum mq_rq_state {
 	MQ_RQ_COMPLETE		= 2,
 };
 
+struct nvme_command;
+
 /*
  * Try to put the fields that are referenced together in the same cacheline.
  *
@@ -190,6 +192,8 @@ struct request {
 		struct __call_single_data csd;
 		u64 fifo_time;
 	};
+
+    struct nvme_command *xrp_command;
 
 	/*
 	 * completion callback.

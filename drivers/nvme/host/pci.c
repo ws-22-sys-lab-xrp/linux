@@ -1179,7 +1179,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
 		ebpf_context.scratch = page_address(req->bio->xrp_scratch_page);
 		ebpf_start = ktime_get();
 		ebpf_prog = req->bio->xrp_bpf_prog;
-		ebpf_return = BPF_PROG_RUN(ebpf_prog, &ebpf_context);
+		ebpf_return = bpf_prog_run(ebpf_prog, &ebpf_context);
 		if (ebpf_return == EINVAL) {
 			printk("nvme_handle_cqe: ebpf search failed\n");
 		} else if (ebpf_return != 0) {
@@ -1237,7 +1237,9 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
 		req->xrp_command->rw.slba = cpu_to_le64(nvme_sect_to_lba(req->q->queuedata, blk_rq_pos(req)));
 		atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time);
 		atomic_long_inc(&xrp_resubmit_int_count);
-		nvme_submit_cmd(nvmeq, req->xrp_command, true);
+        struct request* rqlist[1];
+        rqlist[0] = req;
+		nvme_submit_cmds(nvmeq, rqlist);
 	}
 }
 

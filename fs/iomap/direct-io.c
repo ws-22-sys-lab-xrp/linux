@@ -12,6 +12,7 @@
 #include <linux/backing-dev.h>
 #include <linux/uio.h>
 #include <linux/task_io_accounting_ops.h>
+#include <linux/bpf.h>
 #include "trace.h"
 
 #include "../internal.h"
@@ -352,7 +353,7 @@ static loff_t iomap_dio_bio_iter(const struct iomap_iter *iter,
 		bio->xrp_partition_start_sector = 0;
 		bio->xrp_count = 1;
 		if (bio->xrp_enabled) {
-			if (get_user_pages_fast(dio->iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
+			if (get_user_pages_fast((unsigned long)dio->iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
 				printk("iomap_dio_bio_actor: failed to get scratch page\n");
 				bio->xrp_enabled = false;
 			}

@@ -80,14 +80,17 @@ struct io_uring_sqe {
 			__u64	addr3;
 			__u64	__pad2[1];
 		};
+        struct {
+            __u64	scratch;	/* for IORING_OP_READ_XRP */
+            __s32	bpf_fd;		/* for IORING_OP_READ_XRP */
+            __u32   __pad4[0];
+        };
 		/*
 		 * If the ring is initialized with IORING_SETUP_SQE128, then
 		 * this field is used for 80 bytes of arbitrary command data
 		 */
 		__u8	cmd[0];
 	};
-	__s32	bpf_fd;		/* for IORING_OP_READ_XRP */
-	__u64	scratch;	/* for IORING_OP_READ_XRP */
 };
 
 /*
