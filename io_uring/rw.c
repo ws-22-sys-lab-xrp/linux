@@ -107,9 +107,9 @@ int io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	}
 
     if (sqe->opcode == IORING_OP_READ_XRP) {
-		kiocb->xrp_enabled = true;
-		kiocb->xrp_scratch_buf = (char __user *) sqe->scratch;
-		kiocb->xrp_bpf_fd = (unsigned int) sqe->bpf_fd;
+		rw->kiocb->xrp_enabled = true;
+		rw->kiocb->xrp_scratch_buf = (char __user *) sqe->scratch;
+		rw->kiocb->xrp_bpf_fd = (unsigned int) sqe->bpf_fd;
 	}
 
 	rw->addr = READ_ONCE(sqe->addr);
