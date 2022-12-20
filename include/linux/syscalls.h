@@ -72,6 +72,7 @@ struct open_how;
 struct mount_attr;
 struct landlock_ruleset_attr;
 enum landlock_rule_type;
+struct xrp_stats;
 
 #include <linux/types.h>
 #include <linux/aio_abi.h>
@@ -507,6 +508,8 @@ asmlinkage long sys_writev(unsigned long fd,
 			   unsigned long vlen);
 asmlinkage long sys_pread64(unsigned int fd, char __user *buf,
 			    size_t count, loff_t pos);
+asmlinkage long sys_read_xrp(unsigned int fd, char __user *buf,
+			     size_t count, loff_t pos, unsigned int bpf_fd, char __user *scratch_buf);
 asmlinkage long sys_pwrite64(unsigned int fd, const char __user *buf,
 			     size_t count, loff_t pos);
 asmlinkage long sys_preadv(unsigned long fd, const struct iovec __user *vec,
@@ -1380,6 +1383,9 @@ long compat_ksys_semtimedop(int semid, struct sembuf __user *tsems,
 long __do_semtimedop(int semid, struct sembuf *tsems, unsigned int nsops,
 		     const struct timespec64 *timeout,
 		     struct ipc_namespace *ns);
+
+asmlinkage long sys_print_xrp_stats(struct xrp_stats __user *buf);
+asmlinkage long sys_test_xrp(char __user *data_buf, char __user *scratch_buf, unsigned int bpf_fd);
 
 int __sys_getsockopt(int fd, int level, int optname, char __user *optval,
 		int __user *optlen);
