@@ -16,6 +16,7 @@
 #include <linux/suspend.h>
 #include <linux/fs.h>
 #include <linux/module.h>
+#include <linux/bpf.h>
 #include "blk.h"
 
 static inline struct inode *bdev_file_inode(struct file *file)
@@ -54,6 +55,7 @@ static bool blkdev_dio_unaligned(struct block_device *bdev, loff_t pos,
 static ssize_t __blkdev_direct_IO_simple(struct kiocb *iocb,
 		struct iov_iter *iter, unsigned int nr_pages)
 {
+    struct file *file = iocb->ki_filp;
 	struct block_device *bdev = iocb->ki_filp->private_data;
 	struct bio_vec inline_vecs[DIO_INLINE_BIO_VECS], *vecs;
 	loff_t pos = iocb->ki_pos;
@@ -93,7 +95,7 @@ static ssize_t __blkdev_direct_IO_simple(struct kiocb *iocb,
 	bio.xrp_partition_start_sector = 0;
 	bio.xrp_count = 1;
 	if (bio.xrp_enabled) {
-		if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio.xrp_scratch_page) != 1) {
+		if (get_user_pages_fast((unsigned long)iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio.xrp_scratch_page) != 1) {
 			printk("__blkdev_direct_IO_simple: failed to get scratch page\n");
 			bio.xrp_enabled = false;
 		}
@@ -262,7 +264,7 @@ static ssize_t __blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 		bio->xrp_partition_start_sector = 0;
 		bio->xrp_count = 1;
 		if (bio->xrp_enabled) {
-			if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
+			if (get_user_pages_fast((unsigned long)iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
 				printk("__blkdev_direct_IO: failed to get scratch page\n");
 				bio->xrp_enabled = false;
 			}
