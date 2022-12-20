@@ -40,7 +40,6 @@ struct rq_qos;
 struct blk_queue_stats;
 struct blk_stat_callback;
 struct blk_crypto_profile;
-struct nvme_command;
 
 extern const struct device_type disk_type;
 extern struct device_type part_type;
@@ -197,8 +196,6 @@ struct gendisk {
 	struct badblocks *bb;
 	struct lockdep_map lockdep_map;
 	u64 diskseq;
-
-	struct nvme_command *xrp_command;
 
 	/*
 	 * Independent sector access ranges. This is always NULL for

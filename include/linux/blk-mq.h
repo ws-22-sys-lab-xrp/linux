@@ -10,6 +10,7 @@
 
 struct blk_mq_tags;
 struct blk_flush_queue;
+struct nvme_command;
 
 #define BLKDEV_MIN_RQ	4
 #define BLKDEV_DEFAULT_RQ	128
@@ -201,6 +202,8 @@ struct request {
 	 */
 	rq_end_io_fn *end_io;
 	void *end_io_data;
+
+    struct nvme_command *xrp_command;
 };
 
 static inline enum req_op req_op(const struct request *req)
