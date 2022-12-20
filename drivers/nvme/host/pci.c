@@ -1239,7 +1239,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
 		req->xrp_command->rw.slba = cpu_to_le64(nvme_sect_to_lba(req->q->queuedata, blk_rq_pos(req)));
 		atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time);
 		atomic_long_inc(&xrp_resubmit_int_count);
-		nvme_submit_cmd(nvmeq, req->xrp_command, true);
+        struct request *rqlist[] = {req, NULL};
+		nvme_submit_cmds(nvmeq, rqlist);
 	}
 }
 
