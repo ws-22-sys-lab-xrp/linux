@@ -25,7 +25,6 @@
 #include <linux/srcu.h>
 #include <linux/uuid.h>
 #include <linux/xarray.h>
-#include <linux/nvme.h>
 
 struct module;
 struct request_queue;
@@ -41,6 +40,7 @@ struct rq_qos;
 struct blk_queue_stats;
 struct blk_stat_callback;
 struct blk_crypto_profile;
+struct nvme_command;
 
 extern const struct device_type disk_type;
 extern struct device_type part_type;
