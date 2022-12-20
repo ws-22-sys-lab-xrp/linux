@@ -106,6 +106,12 @@ int io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		rw->kiocb.ki_ioprio = get_current_ioprio();
 	}
 
+    if (sqe->opcode == IORING_OP_READ_XRP) {
+		kiocb->xrp_enabled = true;
+		kiocb->xrp_scratch_buf = (char __user *) sqe->scratch;
+		kiocb->xrp_bpf_fd = (unsigned int) sqe->bpf_fd;
+	}
+
 	rw->addr = READ_ONCE(sqe->addr);
 	rw->len = READ_ONCE(sqe->len);
 	rw->flags = READ_ONCE(sqe->rw_flags);
