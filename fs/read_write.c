@@ -393,9 +393,8 @@ static ssize_t new_sync_read(struct file *filp, char __user *buf, size_t len, lo
 	return ret;
 }
 
-static ssize_t new_sync_read_xrp(struct file *filp, char __user *data_buf, size_t len, loff_t *ppos, unsigned int bpf_fd, char __user *scratch_buf)
+static ssize_t new_sync_read_xrp(struct file *filp, char __user *buf, size_t len, loff_t *ppos, unsigned int bpf_fd, char __user *scratch_buf)
 {
-	struct iovec iov = { .iov_base = data_buf, .iov_len = len };
 	struct kiocb kiocb;
 	struct iov_iter iter;
 	ssize_t ret;
@@ -405,7 +404,7 @@ static ssize_t new_sync_read_xrp(struct file *filp, char __user *data_buf, size_
 	kiocb.xrp_enabled = true;
 	kiocb.xrp_scratch_buf = scratch_buf;
 	kiocb.xrp_bpf_fd = bpf_fd;
-	iov_iter_init(&iter, READ, &iov, 1, len);
+	iov_iter_ubuf(&iter, READ, buf, len);
 
 	ret = call_read_iter(filp, &kiocb, &iter);
 	BUG_ON(ret == -EIOCBQUEUED);
