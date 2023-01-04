@@ -894,20 +894,20 @@ static blk_status_t nvme_map_metadata(struct nvme_dev *dev, struct request *req,
 static blk_status_t nvme_prep_rq(struct nvme_dev *dev, struct request *req)
 {
 	struct nvme_iod *iod = blk_mq_rq_to_pdu(req);
-	struct nvme_command *cmndp;
+	struct nvme_command cmnd, *cmndp;
 	blk_status_t ret;
 
 	if (req->bio && req->bio->xrp_enabled) {
 		cmndp = kmalloc(sizeof(struct nvme_command), GFP_NOWAIT);
 		if (!cmndp) {
 			printk("nvme_queue_rq: failed to allocate struct nvme_command\n");
-			cmndp = &iod->cmd;
+			cmndp = &cmnd;
 			req->xrp_command = NULL;
 		} else {
 			req->xrp_command = cmndp;
 		}
 	} else {
-		cmndp = &iod->cmd;
+		cmndp = &cmnd;
 		req->xrp_command = NULL;
 	}
 
@@ -932,6 +932,7 @@ static blk_status_t nvme_prep_rq(struct nvme_dev *dev, struct request *req)
 	}
 
 	blk_mq_start_request(req);
+    // TODO: nvme_submit_cmd
 	return BLK_STS_OK;
 out_unmap_data:
 	nvme_unmap_data(dev, req);
@@ -1150,6 +1151,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
 
 		struct xrp_mapping mapping;
 		ktime_t extent_lookup_start;
+        struct request *rqlist[2] = {NULL};
 
 		/* verify version number */
 		if (req->bio->xrp_count > 1
@@ -1240,7 +1242,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
 		req->xrp_command->rw.slba = cpu_to_le64(nvme_sect_to_lba(req->q->queuedata, blk_rq_pos(req)));
 		atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time);
 		atomic_long_inc(&xrp_resubmit_int_count);
-        struct request *rqlist[] = {req, NULL};
+        // TODO: nvme_submit_cmd
+        rqlist[0] = req;
 		nvme_submit_cmds(nvmeq, rqlist);
 	}
 }

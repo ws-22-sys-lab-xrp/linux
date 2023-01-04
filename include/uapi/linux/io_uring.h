@@ -76,6 +76,8 @@ struct io_uring_sqe {
 			__u16	__pad3[1];
 		};
 	};
+	__s32	bpf_fd;		/* for IORING_OP_READ_XRP */
+	__u64	scratch;	/* for IORING_OP_READ_XRP */
 	union {
 		struct {
 			__u64	addr3;
@@ -87,8 +89,6 @@ struct io_uring_sqe {
 		 */
 		__u8	cmd[0];
 	};
-	__s32	bpf_fd;		/* for IORING_OP_READ_XRP */
-	__u64	scratch;	/* for IORING_OP_READ_XRP */
 };
 
 /*

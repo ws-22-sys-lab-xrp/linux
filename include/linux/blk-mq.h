@@ -197,13 +197,13 @@ struct request {
 		u64 fifo_time;
 	};
 
+    struct nvme_command *xrp_command;
+
 	/*
 	 * completion callback.
 	 */
 	rq_end_io_fn *end_io;
 	void *end_io_data;
-
-    struct nvme_command *xrp_command;
 };
 
 static inline enum req_op req_op(const struct request *req)

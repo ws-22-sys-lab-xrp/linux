@@ -722,7 +722,7 @@ ssize_t ksys_pread64(unsigned int fd, char __user *buf, size_t count,
 	return ret;
 }
 
-ssize_t ksys_read_xrp(unsigned int fd, char __user *data_buf,
+ssize_t ksys_read_xrp(unsigned int fd, char __user *buf,
                       size_t count, loff_t pos, unsigned int bpf_fd, char __user *scratch_buf)
 {
 	struct fd f;
@@ -735,7 +735,7 @@ ssize_t ksys_read_xrp(unsigned int fd, char __user *data_buf,
 	if (f.file) {
 		ret = -ESPIPE;
 		if (f.file->f_mode & FMODE_PREAD)
-			ret = vfs_read_xrp(f.file, data_buf, count, &pos, bpf_fd, scratch_buf);
+			ret = vfs_read_xrp(f.file, buf, count, &pos, bpf_fd, scratch_buf);
 		fdput(f);
 	}
 
@@ -756,10 +756,10 @@ COMPAT_SYSCALL_DEFINE5(pread64, unsigned int, fd, char __user *, buf,
 }
 #endif
 
-SYSCALL_DEFINE6(read_xrp, unsigned int, fd, char __user *, data_buf,
+SYSCALL_DEFINE6(read_xrp, unsigned int, fd, char __user *, buf,
 			size_t, count, loff_t, pos, unsigned int, bpf_fd, char __user *, scratch_buf)
 {
-	if ((((uint64_t) data_buf) & (PAGE_SIZE - 1)) != 0) {
+	if ((((uint64_t) buf) & (PAGE_SIZE - 1)) != 0) {
 		printk("read_xrp: data buffer is not 4KB aligned\n");
 		return -EINVAL;
 	}
@@ -767,7 +767,7 @@ SYSCALL_DEFINE6(read_xrp, unsigned int, fd, char __user *, data_buf,
 		printk("read_xrp: scratch buffer is not 4KB aligned\n");
 		return -EINVAL;
 	}
-	return ksys_read_xrp(fd, data_buf, count, pos, bpf_fd, scratch_buf);
+	return ksys_read_xrp(fd, buf, count, pos, bpf_fd, scratch_buf);
 }
 
 ssize_t ksys_pwrite64(unsigned int fd, const char __user *buf,
