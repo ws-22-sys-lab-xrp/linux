@@ -927,12 +927,12 @@ SYSCALL_DEFINE3(test_xrp, char __user *, data_buf, char __user *, scratch_buf, u
 		goto out;
 	}
 
-	if (get_user_pages_fast(data_buf, 1, FOLL_WRITE, &data_page) != 1) {
+	if (get_user_pages_fast((unsigned long)data_buf, 1, FOLL_WRITE, &data_page) != 1) {
 		printk("test_xrp: failed to pin data page\n");
 		ret = -EINVAL;
 		goto out;
 	}
-	if (get_user_pages_fast(scratch_buf, 1, FOLL_WRITE, &scratch_page) != 1){
+	if (get_user_pages_fast((unsigned long)scratch_buf, 1, FOLL_WRITE, &scratch_page) != 1){
 		ret = -EINVAL;
 		printk("test_xrp: failed to pin scratch page\n");
 		goto free_data;
@@ -948,7 +948,7 @@ SYSCALL_DEFINE3(test_xrp, char __user *, data_buf, char __user *, scratch_buf, u
 	ebpf_context.data = page_address(data_page);
 	ebpf_context.scratch = page_address(scratch_page);
 	ebpf_start = ktime_get();
-	ebpf_return = BPF_PROG_RUN(ebpf_prog, &ebpf_context);
+	ebpf_return = bpf_prog_run(ebpf_prog, &ebpf_context);
 	if (ebpf_return == EINVAL) {
 		printk("test_xrp: ebpf search failed\n");
 	} else if (ebpf_return != 0) {
