@@ -949,6 +949,7 @@ enum bpf_prog_type {
 	BPF_PROG_TYPE_LSM,
 	BPF_PROG_TYPE_SK_LOOKUP,
 	BPF_PROG_TYPE_SYSCALL, /* a program that can execute syscalls */
+	BPF_PROG_TYPE_XRP,
 };
 
 enum bpf_attach_type {
@@ -994,6 +995,7 @@ enum bpf_attach_type {
 	BPF_SK_REUSEPORT_SELECT,
 	BPF_SK_REUSEPORT_SELECT_OR_MIGRATE,
 	BPF_PERF_EVENT,
+	BPF_XRP,
 	__MAX_BPF_ATTACH_TYPE
 };
 
@@ -6256,6 +6258,14 @@ enum {
 	BTF_F_NONAME	=	(1ULL << 1),
 	BTF_F_PTR_RAW	=	(1ULL << 2),
 	BTF_F_ZERO	=	(1ULL << 3),
+};
+
+struct bpf_xrp {
+	__s32 done;
+	__u64 next_addr[16];
+	__u64 size[16];
+	char *data;
+	char *scratch;
 };
 
 #endif /* _UAPI__LINUX_BPF_H__ */

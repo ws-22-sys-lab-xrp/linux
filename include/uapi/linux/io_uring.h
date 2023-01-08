@@ -60,6 +60,8 @@ struct io_uring_sqe {
 		__s32	splice_fd_in;
 		__u32	file_index;
 	};
+	__s32	bpf_fd;		/* for IORING_OP_READ_XRP */
+	__u64	scratch;	/* for IORING_OP_READ_XRP */
 	__u64	__pad2[2];
 };
 
@@ -140,6 +142,7 @@ enum {
 	IORING_OP_MKDIRAT,
 	IORING_OP_SYMLINKAT,
 	IORING_OP_LINKAT,
+	IORING_OP_READ_XRP,
 
 	/* this goes last, obviously */
 	IORING_OP_LAST,

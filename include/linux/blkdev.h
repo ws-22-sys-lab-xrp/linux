@@ -38,6 +38,7 @@ struct rq_qos;
 struct blk_queue_stats;
 struct blk_stat_callback;
 struct blk_keyslot_manager;
+struct nvme_command;
 
 #define BLKDEV_MIN_RQ	4
 #define BLKDEV_MAX_RQ	128	/* Default maximum */
@@ -227,6 +228,8 @@ struct request {
 		struct __call_single_data csd;
 		u64 fifo_time;
 	};
+
+	struct nvme_command *xrp_command;
 
 	/*
 	 * completion callback.
