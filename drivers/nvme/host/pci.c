@@ -894,22 +894,7 @@ static blk_status_t nvme_map_metadata(struct nvme_dev *dev, struct request *req,
 static blk_status_t nvme_prep_rq(struct nvme_dev *dev, struct request *req)
 {
 	struct nvme_iod *iod = blk_mq_rq_to_pdu(req);
-	struct nvme_command cmnd, *cmndp;
 	blk_status_t ret;
-
-	if (req->bio && req->bio->xrp_enabled) {
-		cmndp = kmalloc(sizeof(struct nvme_command), GFP_NOWAIT);
-		if (!cmndp) {
-			printk("nvme_queue_rq: failed to allocate struct nvme_command\n");
-			cmndp = &cmnd;
-			req->xrp_command = NULL;
-		} else {
-			req->xrp_command = cmndp;
-		}
-	} else {
-		cmndp = &cmnd;
-		req->xrp_command = NULL;
-	}
 
 	iod->aborted = false;
 	iod->nr_allocations = -1;
@@ -920,19 +905,18 @@ static blk_status_t nvme_prep_rq(struct nvme_dev *dev, struct request *req)
 		return ret;
 
 	if (blk_rq_nr_phys_segments(req)) {
-		ret = nvme_map_data(dev, req, cmndp);
+		ret = nvme_map_data(dev, req, &iod->cmd);
 		if (ret)
 			goto out_free_cmd;
 	}
 
 	if (blk_integrity_rq(req)) {
-		ret = nvme_map_metadata(dev, req, cmndp);
+		ret = nvme_map_metadata(dev, req, &iod->cmd);
 		if (ret)
 			goto out_unmap_data;
 	}
 
 	blk_mq_start_request(req);
-    // TODO: nvme_submit_cmd
 	return BLK_STS_OK;
 out_unmap_data:
 	nvme_unmap_data(dev, req);
@@ -951,7 +935,26 @@ static blk_status_t nvme_queue_rq(struct blk_mq_hw_ctx *hctx,
 	struct nvme_dev *dev = nvmeq->dev;
 	struct request *req = bd->rq;
 	struct nvme_iod *iod = blk_mq_rq_to_pdu(req);
+    /* struct nvme_command cmnd, *cmndp; */
 	blk_status_t ret;
+
+	if (req->bio && req->bio->xrp_enabled) {
+        req->xrp_command = &iod->cmd;
+		/* cmndp = kmalloc(sizeof(struct nvme_command), GFP_NOWAIT); */
+		/* if (!cmndp) { */
+		/* 	printk("nvme_queue_rq: failed to allocate struct nvme_command\n"); */
+		/* 	cmndp = &cmnd; */
+		/* 	req->xrp_command = NULL; */
+		/* } else { */
+		/* 	req->xrp_command = cmndp; */
+		/* } */
+	} else {
+		/* cmndp = &cmnd; */
+		req->xrp_command = NULL;
+	}
+
+    // TODO
+    /* iod->cmd = cmndp; */
 
 	/*
 	 * We should not need to do this, but we're still using this to
@@ -975,8 +978,7 @@ static blk_status_t nvme_queue_rq(struct blk_mq_hw_ctx *hctx,
 
 static void nvme_submit_cmds(struct nvme_queue *nvmeq, struct request **rqlist)
 {
-    unsigned long flags;
-	spin_lock_irqsave(&nvmeq->sq_lock, flags);
+	spin_lock(&nvmeq->sq_lock);
 	while (!rq_list_empty(*rqlist)) {
 		struct request *req = rq_list_pop(rqlist);
 		struct nvme_iod *iod = blk_mq_rq_to_pdu(req);
@@ -984,7 +986,7 @@ static void nvme_submit_cmds(struct nvme_queue *nvmeq, struct request **rqlist)
 		nvme_sq_copy_cmd(nvmeq, &iod->cmd);
 	}
 	nvme_write_sq_db(nvmeq, true);
-	spin_unlock_irqrestore(&nvmeq->sq_lock, flags);
+	spin_unlock(&nvmeq->sq_lock);
 }
 
 static bool nvme_prep_rq_batch(struct nvme_queue *nvmeq, struct request *req)
