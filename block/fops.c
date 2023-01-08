@@ -89,6 +89,27 @@ static ssize_t __blkdev_direct_IO_simple(struct kiocb *iocb,
 		goto out;
 	ret = bio.bi_iter.bi_size;
 
+    bio.xrp_enabled = iocb->xrp_enabled;
+	bio.xrp_inode = file->f_inode;
+	bio.xrp_partition_start_sector = 0;
+	bio.xrp_count = 1;
+	if (bio.xrp_enabled) {
+		if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio.xrp_scratch_page) != 1) {
+			printk("__blkdev_direct_IO_simple: failed to get scratch page\n");
+			bio.xrp_enabled = false;
+		}
+	}
+	if (bio.xrp_enabled) {
+		bio.xrp_bpf_prog = bpf_prog_get_type(iocb->xrp_bpf_fd, BPF_PROG_TYPE_XRP);
+		if (IS_ERR(bio.xrp_bpf_prog)) {
+			printk("__blkdev_direct_IO_simple: failed to get bpf prog\n");
+			bio.xrp_bpf_prog = NULL;
+			put_page(bio.xrp_scratch_page);
+			bio.xrp_scratch_page = NULL;
+			bio.xrp_enabled = false;
+		}
+	}
+
 	if (iov_iter_rw(iter) == READ) {
 		bio.bi_opf = REQ_OP_READ;
 		if (iter_is_iovec(iter))
@@ -153,6 +174,13 @@ static void blkdev_bio_end_io(struct bio *bio)
 {
 	struct blkdev_dio *dio = bio->bi_private;
 	bool should_dirty = dio->should_dirty;
+
+	if (bio->xrp_enabled) {
+		put_page(bio->xrp_scratch_page);
+		bio->xrp_scratch_page = NULL;
+		bpf_prog_put(bio->xrp_bpf_prog);
+		bio->xrp_bpf_prog = NULL;
+	}
 
 	if (bio->bi_status && !dio->bio.bi_status)
 		dio->bio.bi_status = bio->bi_status;
@@ -244,6 +272,26 @@ static ssize_t __blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 			break;
 		}
 
+        bio->xrp_enabled = iocb->xrp_enabled;
+		bio->xrp_inode = file->f_inode;
+		bio->xrp_partition_start_sector = 0;
+		bio->xrp_count = 1;
+		if (bio->xrp_enabled) {
+			if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
+				printk("__blkdev_direct_IO: failed to get scratch page\n");
+				bio->xrp_enabled = false;
+			}
+		}
+		if (bio->xrp_enabled) {
+			bio->xrp_bpf_prog = bpf_prog_get_type(iocb->xrp_bpf_fd, BPF_PROG_TYPE_XRP);
+			if (IS_ERR(bio->xrp_bpf_prog)) {
+				printk("__blkdev_direct_IO: failed to get bpf prog\n");
+				bio->xrp_bpf_prog = NULL;
+				put_page(bio->xrp_scratch_page);
+				bio->xrp_scratch_page = NULL;
+				bio->xrp_enabled = false;
+			}
+		}
 		if (is_read) {
 			bio->bi_opf = REQ_OP_READ;
 			if (dio->should_dirty)
