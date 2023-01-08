@@ -1097,7 +1097,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		ebpf_context.scratch = page_address(req->bio->xrp_scratch_page);
 		ebpf_start = ktime_get();
 		ebpf_prog = req->bio->xrp_bpf_prog;
-		ebpf_return = BPF_PROG_RUN(ebpf_prog, &ebpf_context);
+		ebpf_return = bpf_prog_run(ebpf_prog, &ebpf_context);
 		if (ebpf_return == EINVAL) {
 			printk("nvme_handle_cqe: ebpf search failed\n");
 		} else if (ebpf_return != 0) {
