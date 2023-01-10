@@ -1190,7 +1190,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		// nvme_submit_cmd(nvmeq, req->xrp_command, true);
 
 		// TODO: upgrade to nvme_submit_cmds
-		reqs[0].cmd = req;
+		reqs[0].cmd = req->xrp_command;
 		reqs[0].write_sq = true;
 		nvme_submit_cmds(nvmeq, reqs, req_count);
 	}
