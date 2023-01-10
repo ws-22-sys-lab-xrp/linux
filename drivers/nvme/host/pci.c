@@ -525,7 +525,9 @@ static void nvme_submit_cmds(struct nvme_queue *nvmeq,
 			     struct nvme_xrp_request *nvme_xrp_requests,
 			     int nvme_xrp_request_count)
 {
-	for (int i = 0; i < nvme_xrp_request_count; i++) {
+	int i;
+	for (i = 0; i < nvme_xrp_request_count; i++)
+	{
 		struct nvme_command *cmd = nvme_xrp_requests[i].cmd;
 		bool write_sq = nvme_xrp_requests[i].write_sq;
 
