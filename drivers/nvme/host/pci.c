@@ -513,6 +513,33 @@ static void nvme_submit_cmd(struct nvme_queue *nvmeq, struct nvme_command *cmd,
 	spin_unlock_irqrestore(&nvmeq->sq_lock, flags);
 }
 
+struct nvme_xrp_request{
+	struct nvme_command *cmd;
+	bool write_sq;
+};
+
+#define NVME_XRP_REQUEST_NUM 100
+
+
+static void nvme_submit_cmds(struct nvme_queue *nvmeq,
+			     struct nvme_xrp_request *nvme_xrp_requests,
+			     int nvme_xrp_request_count)
+{
+	for (int i = 0; i < nvme_xrp_request_count; i++) {
+		struct nvme_command *cmd = nvme_xrp_requests[i].cmd;
+		bool write_sq = nvme_xrp_requests[i].write_sq;
+
+		unsigned long flags;
+		spin_lock_irqsave(&nvmeq->sq_lock, flags);
+		memcpy(nvmeq->sq_cmds + (nvmeq->sq_tail << nvmeq->sqes), cmd,
+		       sizeof(*cmd));
+		if (++nvmeq->sq_tail == nvmeq->q_depth)
+			nvmeq->sq_tail = 0;
+		nvme_write_sq_db(nvmeq, write_sq);
+		spin_unlock_irqrestore(&nvmeq->sq_lock, flags);
+	}
+}
+
 static void nvme_commit_rqs(struct blk_mq_hw_ctx *hctx)
 {
 	struct nvme_queue *nvmeq = hctx->driver_data;
@@ -1148,6 +1175,11 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 			/* no address translation, use direct map */
 			disk_offset = file_offset;
 		}
+
+		// Add req to nvme_xrp_requests
+		int req_count = 1;
+		struct nvme_xrp_request reqs[req_count];
+		
 		nvme_req(req)->cmd = req->xrp_command;
 		req->bio->xrp_count += 1;
 		req->bio->bi_iter.bi_sector = (disk_offset >> 9) + req->bio->xrp_partition_start_sector;
@@ -1155,7 +1187,12 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		req->xrp_command->rw.slba = cpu_to_le64(nvme_sect_to_lba(req->q->queuedata, blk_rq_pos(req)));
 		atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time);
 		atomic_long_inc(&xrp_resubmit_int_count);
-		nvme_submit_cmd(nvmeq, req->xrp_command, true);
+		// nvme_submit_cmd(nvmeq, req->xrp_command, true);
+
+		// TODO: upgrade to nvme_submit_cmds
+		reqs[0].cmd = req;
+		reqs[0].write_sq = true;
+		nvme_submit_cmds(nvmeq, reqs, req_count);
 	}
 }
 
