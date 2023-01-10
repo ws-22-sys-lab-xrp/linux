@@ -1006,20 +1006,20 @@ static inline struct blk_mq_tags *nvme_queue_tagset(struct nvme_queue *nvmeq)
 
 extern const struct inode_operations ext4_file_inode_operations;
 
-extern atomic_long_t xrp_ebpf_time;
-extern atomic_long_t xrp_ebpf_count;
+/* extern atomic_long_t xrp_ebpf_time; */
+/* extern atomic_long_t xrp_ebpf_count; */
 
-extern atomic_long_t xrp_resubmit_leaf_time;
-extern atomic_long_t xrp_resubmit_leaf_count;
+/* extern atomic_long_t xrp_resubmit_leaf_time; */
+/* extern atomic_long_t xrp_resubmit_leaf_count; */
 
-extern atomic_long_t xrp_resubmit_int_time;
-extern atomic_long_t xrp_resubmit_int_count;
+/* extern atomic_long_t xrp_resubmit_int_time; */
+/* extern atomic_long_t xrp_resubmit_int_count; */
 
-extern atomic_long_t xrp_resubmit_level_nr;
-extern atomic_long_t xrp_resubmit_level_count;
+/* extern atomic_long_t xrp_resubmit_level_nr; */
+/* extern atomic_long_t xrp_resubmit_level_count; */
 
-extern atomic_long_t xrp_extent_lookup_time;
-extern atomic_long_t xrp_extent_lookup_count;
+/* extern atomic_long_t xrp_extent_lookup_time; */
+/* extern atomic_long_t xrp_extent_lookup_count; */
 
 static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 {
@@ -1074,8 +1074,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 
 			extent_lookup_start = ktime_get();
 			xrp_retrieve_mapping(req->bio->xrp_inode, file_offset, data_len, &mapping);
-			atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time);
-			atomic_long_inc(&xrp_extent_lookup_count);
+			/* atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time); */
+			/* atomic_long_inc(&xrp_extent_lookup_count); */
 			if (!mapping.exist || mapping.len < data_len || mapping.address & 0x1ff) {
 				printk("nvme_handle_cqe: failed to retrieve address mapping during verification with logical address 0x%llx, dump context\n", file_offset);
 				ebpf_dump_page((uint8_t *) ebpf_context.scratch, 4096);
@@ -1103,8 +1103,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		} else if (ebpf_return != 0) {
 			printk("nvme_handle_cqe: ebpf search unknown error %d\n", ebpf_return);
 		}
-		atomic_long_add(ktime_sub(ktime_get(), ebpf_start), &xrp_ebpf_time);
-		atomic_long_inc(&xrp_ebpf_count);
+		/* atomic_long_add(ktime_sub(ktime_get(), ebpf_start), &xrp_ebpf_time); */
+		/* atomic_long_inc(&xrp_ebpf_count); */
 
 		if (ebpf_return != 0) {
 			/* error happens when calling ebpf function. end the request and return */
@@ -1116,10 +1116,10 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		}
 		if (ebpf_context.done) {
 			/* finish traversal */
-			atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_leaf_time);
-			atomic_long_inc(&xrp_resubmit_leaf_count);
-			atomic_long_add(req->bio->xrp_count, &xrp_resubmit_level_nr);
-			atomic_long_inc(&xrp_resubmit_level_count);
+			/* atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_leaf_time); */
+			/* atomic_long_inc(&xrp_resubmit_leaf_count); */
+			/* atomic_long_add(req->bio->xrp_count, &xrp_resubmit_level_nr); */
+			/* atomic_long_inc(&xrp_resubmit_level_count); */
 			if (!nvme_try_complete_req(req, cqe->status, cqe->result))
 				nvme_pci_complete_rq(req);
 			return;
@@ -1132,8 +1132,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		if (req->bio->xrp_inode->i_op == &ext4_file_inode_operations) {
 			extent_lookup_start = ktime_get();
 			xrp_retrieve_mapping(req->bio->xrp_inode, file_offset, data_len, &mapping);
-			atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time);
-			atomic_long_inc(&xrp_extent_lookup_count);
+			/* atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time); */
+			/* atomic_long_inc(&xrp_extent_lookup_count); */
 			if (!mapping.exist || mapping.len < data_len || mapping.address & 0x1ff) {
 				printk("nvme_handle_cqe: failed to retrieve address mapping with logical address 0x%llx, dump context\n", file_offset);
 				ebpf_dump_page((uint8_t *) ebpf_context.scratch, 4096);
@@ -1153,8 +1153,8 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		req->bio->bi_iter.bi_sector = (disk_offset >> 9) + req->bio->xrp_partition_start_sector;
 		req->__sector = req->bio->bi_iter.bi_sector;
 		req->xrp_command->rw.slba = cpu_to_le64(nvme_sect_to_lba(req->q->queuedata, blk_rq_pos(req)));
-		atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time);
-		atomic_long_inc(&xrp_resubmit_int_count);
+		/* atomic_long_add(ktime_sub(ktime_get(), resubmit_start), &xrp_resubmit_int_time); */
+		/* atomic_long_inc(&xrp_resubmit_int_count); */
 		nvme_submit_cmd(nvmeq, req->xrp_command, true);
 	}
 }

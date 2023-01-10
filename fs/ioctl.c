@@ -882,30 +882,30 @@ out:
 
 extern const struct inode_operations ext4_file_inode_operations;
 
-atomic_long_t xrp_ebpf_time;
-EXPORT_SYMBOL(xrp_ebpf_time);
-atomic_long_t xrp_ebpf_count;
-EXPORT_SYMBOL(xrp_ebpf_count);
-
-atomic_long_t xrp_resubmit_leaf_time;
-EXPORT_SYMBOL(xrp_resubmit_leaf_time);
-atomic_long_t xrp_resubmit_leaf_count;
-EXPORT_SYMBOL(xrp_resubmit_leaf_count);
-
-atomic_long_t xrp_resubmit_int_time;
-EXPORT_SYMBOL(xrp_resubmit_int_time);
-atomic_long_t xrp_resubmit_int_count;
-EXPORT_SYMBOL(xrp_resubmit_int_count);
-
-atomic_long_t xrp_resubmit_level_nr;
-EXPORT_SYMBOL(xrp_resubmit_level_nr);
-atomic_long_t xrp_resubmit_level_count;
-EXPORT_SYMBOL(xrp_resubmit_level_count);
-
-atomic_long_t xrp_extent_lookup_time;
-EXPORT_SYMBOL(xrp_extent_lookup_time);
-atomic_long_t xrp_extent_lookup_count;
-EXPORT_SYMBOL(xrp_extent_lookup_count);
+// atomic_long_t xrp_ebpf_time;
+// EXPORT_SYMBOL(xrp_ebpf_time);
+// atomic_long_t xrp_ebpf_count;
+// EXPORT_SYMBOL(xrp_ebpf_count);
+// 
+// atomic_long_t xrp_resubmit_leaf_time;
+// EXPORT_SYMBOL(xrp_resubmit_leaf_time);
+// atomic_long_t xrp_resubmit_leaf_count;
+// EXPORT_SYMBOL(xrp_resubmit_leaf_count);
+// 
+// atomic_long_t xrp_resubmit_int_time;
+// EXPORT_SYMBOL(xrp_resubmit_int_time);
+// atomic_long_t xrp_resubmit_int_count;
+// EXPORT_SYMBOL(xrp_resubmit_int_count);
+// 
+// atomic_long_t xrp_resubmit_level_nr;
+// EXPORT_SYMBOL(xrp_resubmit_level_nr);
+// atomic_long_t xrp_resubmit_level_count;
+// EXPORT_SYMBOL(xrp_resubmit_level_count);
+// 
+// atomic_long_t xrp_extent_lookup_time;
+// EXPORT_SYMBOL(xrp_extent_lookup_time);
+// atomic_long_t xrp_extent_lookup_count;
+// EXPORT_SYMBOL(xrp_extent_lookup_count);
 
 SYSCALL_DEFINE3(test_xrp, char __user *, data_buf, char __user *, scratch_buf, unsigned int, bpf_fd)
 {
@@ -954,8 +954,8 @@ SYSCALL_DEFINE3(test_xrp, char __user *, data_buf, char __user *, scratch_buf, u
 	} else if (ebpf_return != 0) {
 		printk("test_xrp: ebpf search unknown error %d\n", ebpf_return);
 	}
-	atomic_long_add(ktime_sub(ktime_get(), ebpf_start), &xrp_ebpf_time);
-	atomic_long_inc(&xrp_ebpf_count);
+	/* atomic_long_add(ktime_sub(ktime_get(), ebpf_start), &xrp_ebpf_time); */
+	/* atomic_long_inc(&xrp_ebpf_count); */
 
 	if (ebpf_return != 0) {
 		printk("test_xrp: bpf error, dump data page:\n");
@@ -973,48 +973,48 @@ out:
 	return ret;
 }
 
-SYSCALL_DEFINE1(print_xrp_stats, struct xrp_stats __user *, buf)
-{
-	long _xrp_ebpf_time = atomic_long_xchg(&xrp_ebpf_time, 0);
-	long _xrp_ebpf_count = atomic_long_xchg(&xrp_ebpf_count, 0);
-	long _xrp_resubmit_int_time = atomic_long_xchg(&xrp_resubmit_int_time, 0);
-	long _xrp_resubmit_int_count = atomic_long_xchg(&xrp_resubmit_int_count, 0);
-	long _xrp_resubmit_leaf_time = atomic_long_xchg(&xrp_resubmit_leaf_time, 0);
-	long _xrp_resubmit_leaf_count = atomic_long_xchg(&xrp_resubmit_leaf_count, 0);
-	long _xrp_resubmit_level_nr = atomic_long_xchg(&xrp_resubmit_level_nr, 0);
-	long _xrp_resubmit_level_count = atomic_long_xchg(&xrp_resubmit_level_count, 0);
-	long _xrp_extent_lookup_time = atomic_long_xchg(&xrp_extent_lookup_time, 0);
-	long _xrp_extent_lookup_count = atomic_long_xchg(&xrp_extent_lookup_count, 0);
+/* SYSCALL_DEFINE1(print_xrp_stats, struct xrp_stats __user *, buf) */
+/* { */
+/* 	long _xrp_ebpf_time = atomic_long_xchg(&xrp_ebpf_time, 0); */
+/* 	long _xrp_ebpf_count = atomic_long_xchg(&xrp_ebpf_count, 0); */
+/* 	long _xrp_resubmit_int_time = atomic_long_xchg(&xrp_resubmit_int_time, 0); */
+/* 	long _xrp_resubmit_int_count = atomic_long_xchg(&xrp_resubmit_int_count, 0); */
+/* 	long _xrp_resubmit_leaf_time = atomic_long_xchg(&xrp_resubmit_leaf_time, 0); */
+/* 	long _xrp_resubmit_leaf_count = atomic_long_xchg(&xrp_resubmit_leaf_count, 0); */
+/* 	long _xrp_resubmit_level_nr = atomic_long_xchg(&xrp_resubmit_level_nr, 0); */
+/* 	long _xrp_resubmit_level_count = atomic_long_xchg(&xrp_resubmit_level_count, 0); */
+/* 	long _xrp_extent_lookup_time = atomic_long_xchg(&xrp_extent_lookup_time, 0); */
+/* 	long _xrp_extent_lookup_count = atomic_long_xchg(&xrp_extent_lookup_count, 0); */
 
-	struct xrp_stats stats = {
-		_xrp_ebpf_time,
-		_xrp_ebpf_count,
-		_xrp_resubmit_int_time,
-		_xrp_resubmit_int_count,
-		_xrp_resubmit_leaf_time,
-		_xrp_resubmit_leaf_count,
-		_xrp_resubmit_level_nr,
-		_xrp_resubmit_level_count,
-		_xrp_extent_lookup_time,
-		_xrp_extent_lookup_count,
-	};
+/* 	struct xrp_stats stats = { */
+/* 		_xrp_ebpf_time, */
+/* 		_xrp_ebpf_count, */
+/* 		_xrp_resubmit_int_time, */
+/* 		_xrp_resubmit_int_count, */
+/* 		_xrp_resubmit_leaf_time, */
+/* 		_xrp_resubmit_leaf_count, */
+/* 		_xrp_resubmit_level_nr, */
+/* 		_xrp_resubmit_level_count, */
+/* 		_xrp_extent_lookup_time, */
+/* 		_xrp_extent_lookup_count, */
+/* 	}; */
 
-	printk("xrp_ebpf_time: %ld\n", _xrp_ebpf_time);
-	printk("xrp_ebpf_count: %ld\n", _xrp_ebpf_count);
-	printk("xrp_resubmit_int_time: %ld\n", _xrp_resubmit_int_time);
-	printk("xrp_resubmit_int_count: %ld\n", _xrp_resubmit_int_count);
-	printk("xrp_resubmit_leaf_time: %ld\n", _xrp_resubmit_leaf_time);
-	printk("xrp_resubmit_leaf_count: %ld\n", _xrp_resubmit_leaf_count);
-	printk("xrp_resubmit_level_nr: %ld\n", _xrp_resubmit_level_nr);
-	printk("xrp_resubmit_level_count: %ld\n", _xrp_resubmit_level_count);
-	printk("xrp_extent_lookup_time: %ld\n", _xrp_extent_lookup_time);
-	printk("xrp_extent_lookup_count: %ld\n", _xrp_extent_lookup_count);
+/* 	printk("xrp_ebpf_time: %ld\n", _xrp_ebpf_time); */
+/* 	printk("xrp_ebpf_count: %ld\n", _xrp_ebpf_count); */
+/* 	printk("xrp_resubmit_int_time: %ld\n", _xrp_resubmit_int_time); */
+/* 	printk("xrp_resubmit_int_count: %ld\n", _xrp_resubmit_int_count); */
+/* 	printk("xrp_resubmit_leaf_time: %ld\n", _xrp_resubmit_leaf_time); */
+/* 	printk("xrp_resubmit_leaf_count: %ld\n", _xrp_resubmit_leaf_count); */
+/* 	printk("xrp_resubmit_level_nr: %ld\n", _xrp_resubmit_level_nr); */
+/* 	printk("xrp_resubmit_level_count: %ld\n", _xrp_resubmit_level_count); */
+/* 	printk("xrp_extent_lookup_time: %ld\n", _xrp_extent_lookup_time); */
+/* 	printk("xrp_extent_lookup_count: %ld\n", _xrp_extent_lookup_count); */
 
-	if (buf != NULL && copy_to_user(buf, &stats, sizeof(struct xrp_stats)))
-		return -EFAULT;
+/* 	if (buf != NULL && copy_to_user(buf, &stats, sizeof(struct xrp_stats))) */
+/* 		return -EFAULT; */
 
-	return 0;
-}
+/* 	return 0; */
+/* } */
 
 int xrp_bpf_prog_attach(const union bpf_attr *attr, struct bpf_prog *prog)
 {
