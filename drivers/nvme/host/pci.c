@@ -1060,11 +1060,11 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		u32 ebpf_return;
 		loff_t file_offset, data_len;
 		u64 disk_offset;
-		ktime_t ebpf_start;
-		ktime_t resubmit_start = ktime_get();
+		/* ktime_t ebpf_start; */
+		/* ktime_t resubmit_start = ktime_get(); */
 
 		struct xrp_mapping mapping;
-		ktime_t extent_lookup_start;
+		/* ktime_t extent_lookup_start; */
 
 		/* verify version number */
 		if (req->bio->xrp_count > 1
@@ -1072,7 +1072,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 			file_offset = req->bio->xrp_file_offset;
 			data_len = 512;
 
-			extent_lookup_start = ktime_get();
+			/* extent_lookup_start = ktime_get(); */
 			xrp_retrieve_mapping(req->bio->xrp_inode, file_offset, data_len, &mapping);
 			/* atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time); */
 			/* atomic_long_inc(&xrp_extent_lookup_count); */
@@ -1095,7 +1095,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		memset(&ebpf_context, 0, sizeof(struct bpf_xrp_kern));
 		ebpf_context.data = page_address(bio_page(req->bio));
 		ebpf_context.scratch = page_address(req->bio->xrp_scratch_page);
-		ebpf_start = ktime_get();
+		/* ebpf_start = ktime_get(); */
 		ebpf_prog = req->bio->xrp_bpf_prog;
 		ebpf_return = bpf_prog_run(ebpf_prog, &ebpf_context);
 		if (ebpf_return == EINVAL) {
@@ -1130,7 +1130,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 		// FIXME: support variable data_len and more than one next_addr
 		req->bio->xrp_file_offset = file_offset;
 		if (req->bio->xrp_inode->i_op == &ext4_file_inode_operations) {
-			extent_lookup_start = ktime_get();
+			/* extent_lookup_start = ktime_get(); */
 			xrp_retrieve_mapping(req->bio->xrp_inode, file_offset, data_len, &mapping);
 			/* atomic_long_add(ktime_sub(ktime_get(), extent_lookup_start), &xrp_extent_lookup_time); */
 			/* atomic_long_inc(&xrp_extent_lookup_count); */

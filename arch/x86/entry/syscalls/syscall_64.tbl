@@ -371,7 +371,7 @@
 447	common	memfd_secret		sys_memfd_secret
 448	common	process_mrelease	sys_process_mrelease
 
-449	common	print_xrp_stats		sys_print_xrp_stats
+# 449	common	print_xrp_stats		sys_print_xrp_stats
 450	common	read_xrp	        sys_read_xrp
 451	common	test_xrp		sys_test_xrp
 
