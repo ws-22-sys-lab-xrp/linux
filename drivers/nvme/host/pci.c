@@ -1095,7 +1095,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 
 		/* Early Stop*/
 		atomic_long_inc(&xrp_ebpf_count);
-		if (xrp_ebpf_count > (atomic_long_t)MAX_XRP_COUNT) {
+		if (xrp_ebpf_count.counter > MAX_XRP_COUNT) {
 			return;
 		}
 
