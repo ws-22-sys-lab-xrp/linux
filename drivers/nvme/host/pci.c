@@ -43,6 +43,7 @@
  */
 #define NVME_MAX_KB_SZ	4096
 #define NVME_MAX_SEGS	127
+#define MAX_XRP_COUNT 	1000
 
 static int use_threaded_interrupts;
 module_param(use_threaded_interrupts, int, 0);
@@ -1092,6 +1093,12 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 			}
 		}
 
+		/* Early Stop*/
+		atomic_long_inc(&xrp_ebpf_count);
+		if (xrp_ebpf_count > MAX_XRP_COUNT) {
+			return;
+		}
+
 		memset(&ebpf_context, 0, sizeof(struct bpf_xrp_kern));
 		ebpf_context.data = page_address(bio_page(req->bio));
 		ebpf_context.scratch = page_address(req->bio->xrp_scratch_page);
@@ -1104,7 +1111,6 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq, u16 idx)
 			printk("nvme_handle_cqe: ebpf search unknown error %d\n", ebpf_return);
 		}
 		atomic_long_add(ktime_sub(ktime_get(), ebpf_start), &xrp_ebpf_time);
-		atomic_long_inc(&xrp_ebpf_count);
 
 		if (ebpf_return != 0) {
 			/* error happens when calling ebpf function. end the request and return */
