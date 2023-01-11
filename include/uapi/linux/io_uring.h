@@ -62,7 +62,7 @@ struct io_uring_sqe {
 	};
 	__s32	bpf_fd;		/* for IORING_OP_READ_XRP */
 	__u64	scratch;	/* for IORING_OP_READ_XRP */
-	__u64	__pad2[2];
+	__u32	__pad2[1];
 };
 
 enum {
