@@ -918,7 +918,6 @@ static blk_status_t nvme_queue_rq(struct blk_mq_hw_ctx *hctx,
 	struct nvme_dev *dev = nvmeq->dev;
 	struct request *req = bd->rq;
 	struct nvme_iod *iod = blk_mq_rq_to_pdu(req);
-	struct nvme_command *cmnd = &iod->cmd;
     struct nvme_command *cmndp;
 	blk_status_t ret;
 
@@ -926,13 +925,13 @@ static blk_status_t nvme_queue_rq(struct blk_mq_hw_ctx *hctx,
         cmndp = kmalloc(sizeof(struct nvme_command), GFP_NOWAIT);
         if (!cmndp) {
             printk("nvme_queue_rq: failed to allocate struct nvme_command\n");
-            cmndp = &cmnd;
-            req->xrp_command = NULL:
+            cmndp = &iod->cmd;
+            req->xrp_command = NULL;
         } else {
             req->xrp_command = cmndp;
         }
 	} else {
-        cmndp = &cmnd;
+        cmndp = &iod->cmd;
 		req->xrp_command = NULL;
 	}
 
