@@ -928,6 +928,7 @@ static blk_status_t nvme_queue_rq(struct blk_mq_hw_ctx *hctx,
             cmndp = &iod->cmd;
             req->xrp_command = NULL;
         } else {
+            nvme_req(req)->cmd = cmndp;
             req->xrp_command = cmndp;
         }
 	} else {
