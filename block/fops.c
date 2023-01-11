@@ -134,6 +134,13 @@ static ssize_t __blkdev_direct_IO_simple(struct kiocb *iocb,
 	}
 	__set_current_state(TASK_RUNNING);
 
+	if (bio.xrp_enabled) {
+		put_page(bio.xrp_scratch_page);
+		bio.xrp_scratch_page = NULL;
+		bpf_prog_put(bio.xrp_bpf_prog);
+		bio.xrp_bpf_prog = NULL;
+	}
+
 	bio_release_pages(&bio, should_dirty);
 	if (unlikely(bio.bi_status))
 		ret = blk_status_to_errno(bio.bi_status);
