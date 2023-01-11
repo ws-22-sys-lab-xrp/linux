@@ -611,11 +611,10 @@ static inline bool nvme_try_complete_req(struct request *req, __le16 status,
 		union nvme_result result)
 {
 	struct nvme_request *rq = nvme_req(req);
-    // necessary(?), because iod now manages its cmd
-	/* if (req->xrp_command) { */
-	/* 	kfree(req->xrp_command); */
-	/* 	req->xrp_command = NULL; */
-	/* } */
+	if (req->xrp_command) {
+		kfree(req->xrp_command);
+		req->xrp_command = NULL;
+	}
 
 	rq->status = le16_to_cpu(status) >> 1;
 	rq->result = result;
