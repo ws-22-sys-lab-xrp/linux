@@ -94,7 +94,7 @@ static ssize_t __blkdev_direct_IO_simple(struct kiocb *iocb,
 	bio.xrp_partition_start_sector = 0;
 	bio.xrp_count = 1;
 	if (bio.xrp_enabled) {
-		if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio.xrp_scratch_page) != 1) {
+		if (get_user_pages_fast((unsigned long)iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio.xrp_scratch_page) != 1) {
 			printk("__blkdev_direct_IO_simple: failed to get scratch page\n");
 			bio.xrp_enabled = false;
 		}
@@ -277,7 +277,7 @@ static ssize_t __blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 		bio->xrp_partition_start_sector = 0;
 		bio->xrp_count = 1;
 		if (bio->xrp_enabled) {
-			if (get_user_pages_fast(iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
+			if (get_user_pages_fast((unsigned long)iocb->xrp_scratch_buf, 1, FOLL_WRITE, &bio->xrp_scratch_page) != 1) {
 				printk("__blkdev_direct_IO: failed to get scratch page\n");
 				bio->xrp_enabled = false;
 			}
